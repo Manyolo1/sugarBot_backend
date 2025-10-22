@@ -1,3 +1,5 @@
+setuptools>=68.0.0
+wheel>=0.40.0
 annotated-types==0.7.0
 anyio==4.11.0
 click==8.3.0
@@ -6,7 +8,7 @@ fastapi==0.119.1
 h11==0.16.0
 idna==3.11
 numpy==1.26.4
-pandas==2.2.2
+pandas>=2.2.2,<3.0.0
 openpyxl==3.1.5
 pydantic==2.12.3
 pydantic_core==2.41.4
