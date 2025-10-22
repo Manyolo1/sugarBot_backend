@@ -1,4 +1,4 @@
-# filename: app.py
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -13,9 +13,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda
 
-# -------------------------
-# FastAPI & CORS setup
-# -------------------------
+
 app = FastAPI(title="AI Chatbot API", version="1.1")
 
 app.add_middleware(
@@ -26,12 +24,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -------------------------
-# Global Storage & Config
-# -------------------------
+
 data_store = {"df": None, "metadata": {}, "data_summary": ""}
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyAbjTHnwCXQN4GrJ9KmY09KUi_hOG2quvk")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 if not GOOGLE_API_KEY:
     print("⚠️ WARNING: GOOGLE_API_KEY not configured.")
 
@@ -44,9 +40,7 @@ llm = ChatGoogleGenerativeAI(
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 
-# -------------------------
-# Pydantic models
-# -------------------------
+
 class ChatMessage(BaseModel):
     message: str
     mode: str = "to-the-point"  # options: to-the-point, detailed, inference
@@ -58,9 +52,7 @@ class ChatResponse(BaseModel):
     timestamp: str
 
 
-# -------------------------
-# Data analysis helpers
-# -------------------------
+
 def analyze_dataframe(df: pd.DataFrame) -> dict:
     meta = {
         "total_rows": len(df),
@@ -92,9 +84,7 @@ CATEGORICAL COLUMNS: {', '.join(metadata.get("categorical_columns", []))}
 """
 
 
-# -------------------------
-# Prompt templates
-# -------------------------
+# prompt templates
 TO_THE_POINT_TEMPLATE = """You are a professional data analyst assistant. Provide CONCISE, DIRECT answers.
 Do NOT output markdown formatting.
 
@@ -138,9 +128,7 @@ USER QUESTION: {question}
 INFERENCE:"""
 
 
-# -------------------------
-# Generate LLM response
-# -------------------------
+# llm chain
 def get_llm_response(question: str, data_context: str, mode: str) -> str:
     try:
         # Select the right prompt template
@@ -156,30 +144,27 @@ def get_llm_response(question: str, data_context: str, mode: str) -> str:
             template=template
         )
 
-        # Get stored memory
+        # short term memory
         mem_vars = memory.load_memory_variables({})
         chat_history_msgs = mem_vars.get("chat_history", [])
 
-        # Convert memory list into readable text
+        
         chat_history = "\n".join(
             f"{msg.type if hasattr(msg, 'type') else 'Message'}: {msg.content if hasattr(msg, 'content') else str(msg)}"
             for msg in chat_history_msgs
         ) if isinstance(chat_history_msgs, list) else str(chat_history_msgs)
 
-        # Format prompt
+        
         prompt_text = prompt.format(
             chat_history=chat_history,
             data_context=data_context,
             question=question
         )
 
-        # Debug (optional)
-        # print("🧩 Prompt Sent to LLM:\n", prompt_text)
-
-        # Invoke LLM directly (no need for RunnableSequence)
+        
         result = llm.invoke(prompt_text)
 
-        # Save chat to memory
+        
         memory.save_context(
             {"question": question},
             {"response": result.content if hasattr(result, "content") else str(result)}
@@ -191,9 +176,7 @@ def get_llm_response(question: str, data_context: str, mode: str) -> str:
         return f"Error generating response: {str(e)}"
 
 
-# -------------------------
-# API endpoints
-# -------------------------
+# api endpts
 @app.post("/upload")
 async def upload_excel(file: UploadFile = File(...)):
     if not file.filename.endswith(('.xlsx', '.xls')):
@@ -252,7 +235,7 @@ async def health():
 @app.get("/")
 async def root():
     return {
-        "message": "Gemini Chatbot with Short-Term Memory",
+        "message": "sugar bot",
         "version": "1.1",
         "endpoints": {
             "POST /upload": "Upload Excel file",
@@ -264,10 +247,8 @@ async def root():
     }
 
 
-# -------------------------
-# Run app
-# -------------------------
+
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting FastAPI LangChain App with Memory...")
+    print(" Starting App...")
     uvicorn.run(app, host="0.0.0.0", port=8000)
