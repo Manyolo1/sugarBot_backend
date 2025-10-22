@@ -31,7 +31,7 @@ app.add_middleware(
 # -------------------------
 data_store = {"df": None, "metadata": {}, "data_summary": ""}
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyC2aoFncoyYIa56AiH39POKixZn3E_VCus")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyAbjTHnwCXQN4GrJ9KmY09KUi_hOG2quvk")
 if not GOOGLE_API_KEY:
     print("⚠️ WARNING: GOOGLE_API_KEY not configured.")
 
