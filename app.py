@@ -201,6 +201,8 @@ async def upload_excel(file: UploadFile = File(...)):
 
     contents = await file.read()
     df = pd.read_excel(io.BytesIO(contents))
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='ignore') 
     data_store["df"] = df
     data_store["metadata"] = analyze_dataframe(df)
     data_store["data_summary"] = create_data_context(df, data_store["metadata"])
